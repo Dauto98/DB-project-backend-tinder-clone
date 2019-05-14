@@ -24,12 +24,12 @@ module.exports = {
           });
           console.log("User does not exist!");
         } else {
-          bcrypt.compare(req.body.password, user.password, (err, result) => {
-            if (err) {
+          bcrypt.compare(req.body.password, user.password).then(result => {
+            if (!result) {
               res.status(422).json({
                 message: "Auth failed!"
               });
-            } else if (result) {
+            } else {
               jwt.sign({
                 username: user.username,
                 userID: user.id
@@ -45,11 +45,12 @@ module.exports = {
                   });
                 }
               });
-            } else {
-              res.status(422).json({
-                message: "Auth failed"
-              });
             }
+          }).catch(err => {
+            console.error(err);
+            res.status(422).json({
+              message: "Auth failed!"
+            });
           });
         }
       });
