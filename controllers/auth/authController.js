@@ -32,7 +32,7 @@ module.exports = {
             } else {
               jwt.sign({
                 username: user.username,
-                userID: user.id
+                userId: user.id
               }, process.env.SECRET_KEY, { expiresIn: "1h", algorithm: "HS512" }, (err, token) => {
                 if (err) {
                   res.status(422).json({

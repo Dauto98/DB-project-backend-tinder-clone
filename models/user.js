@@ -28,10 +28,25 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING
     },
     gender: {
-      type: DataTypes.BOOLEAN
+      type: DataTypes.ENUM("F", "M")
     },
     dob: {
       type: DataTypes.DATE
+    }
+  },
+  {
+    classMethods: {
+      associate: models => {
+        User.hasMany(models.Feedback, {
+          onDelete: "CASCADE",
+          foreignKey: {
+            fieldName: "userId",
+            allowNull: false,
+            require: true
+          },
+          targetKey: "id"
+        });
+      }
     }
   });
 
