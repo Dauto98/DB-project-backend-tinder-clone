@@ -16,7 +16,7 @@ module.exports = {
               },
               order: [["createdAt", "ASC"]],
               limit: req.query.limit || 20
-            }).then(data => res.json(data));
+            }).then(data => res.json(data.map(userData => ({ ...userData.get({ plain: true }), dob: new Date(userData.dob / 1000).toString() }))));
           } else {
             db.User.findAll({
               where: {
@@ -25,7 +25,7 @@ module.exports = {
               },
               order: [["createdAt", "ASC"]],
               limit: req.query.limit || 20
-            }).then(data => res.json(data));
+            }).then(data => res.json(data.map(userData => ({ ...userData.get({ plain: true }), dob: new Date(userData.dob / 1000).toString() }))));
           }
         });
       } else {
@@ -37,7 +37,10 @@ module.exports = {
   getOne: (req, res) => {
     db.User.findByPk(req.params.id).then(user => {
       if (user) {
-        res.json(user);
+        res.json({
+          ...user.get({ plain: true }),
+          dob: new Date(user.dob / 1000).getTime()
+        });
       } else {
         res.json({ error: "user not found" });
       }
@@ -46,26 +49,34 @@ module.exports = {
 
   /**
    * req.body = {
-   *    id: targetUserId,
    *    status: like status
    * }
    */
   like: (req, res) => {
-    db.User.findByPk(req.body.id).then(targetUser => {
+    db.User.findByPk(req.params.id).then(targetUser => {
       if (targetUser) {
-        db.LikeStatus.create({
-          userId: req.userData.userId,
-          targetUserId: req.body.id,
-          status: req.body.status
-        });
         db.LikeStatus.findOne({ where: {
-          userId: req.body.id,
-          targetUserId: req.userData.userId
-        } }).then(likeData => {
-          if (!likeData || likeData.status === "unliked") {
-            res.status(200).end();
+          userId: req.userData.userId,
+          targetUserId: req.params.id
+        } }).then(liked => {
+          if (liked) {
+            res.json({ message: "You already swiped this person" });
           } else {
-            res.status(200).json({ status: "matched" });
+            db.LikeStatus.create({
+              userId: req.userData.userId,
+              targetUserId: req.params.id,
+              status: req.body.status
+            });
+            db.LikeStatus.findOne({ where: {
+              userId: req.params.id,
+              targetUserId: req.userData.userId
+            } }).then(likeData => {
+              if (!likeData || likeData.status === "unliked") {
+                res.status(200).end();
+              } else {
+                res.status(200).json({ status: "matched" });
+              }
+            });
           }
         });
       } else {

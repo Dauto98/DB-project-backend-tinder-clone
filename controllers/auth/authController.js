@@ -33,7 +33,7 @@ module.exports = {
               jwt.sign({
                 username: user.username,
                 userId: user.id
-              }, process.env.SECRET_KEY, { expiresIn: "1h", algorithm: "HS512" }, (err, token) => {
+              }, process.env.SECRET_KEY, { algorithm: "HS512" }, (err, token) => {
                 if (err) {
                   res.status(422).json({
                     message: "Auth failed",

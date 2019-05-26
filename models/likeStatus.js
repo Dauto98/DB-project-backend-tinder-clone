@@ -8,7 +8,6 @@ module.exports = (sequelize, DataTypes) => {
     },
     status: {
       type: DataTypes.ENUM("liked", "unliked"),
-      defaultValue: "pending",
       allowNull: false
     },
     userId: {
