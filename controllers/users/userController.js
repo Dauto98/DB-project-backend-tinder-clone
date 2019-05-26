@@ -16,7 +16,7 @@ module.exports = {
               },
               order: [["createdAt", "ASC"]],
               limit: req.query.limit || 20
-            }).then(data => res.json(data.map(userData => ({ ...userData.get({ plain: true }), dob: new Date(userData.dob / 1000).toString() }))));
+            }).then(data => res.json(data.map(userData => ({ ...userData.get({ plain: true }), dob: new Date(userData.dob / 1000).getTime().toString() }))));
           } else {
             db.User.findAll({
               where: {
@@ -25,7 +25,7 @@ module.exports = {
               },
               order: [["createdAt", "ASC"]],
               limit: req.query.limit || 20
-            }).then(data => res.json(data.map(userData => ({ ...userData.get({ plain: true }), dob: new Date(userData.dob / 1000).toString() }))));
+            }).then(data => res.json(data.map(userData => ({ ...userData.get({ plain: true }), dob: new Date(userData.dob / 1000).getTime().toString() }))));
           }
         });
       } else {
@@ -39,7 +39,7 @@ module.exports = {
       if (user) {
         res.json({
           ...user.get({ plain: true }),
-          dob: new Date(user.dob / 1000).getTime()
+          dob: new Date(user.dob / 1000).getTime().toString()
         });
       } else {
         res.json({ error: "user not found" });
