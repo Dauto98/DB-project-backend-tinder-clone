@@ -129,5 +129,82 @@ module.exports = {
         res.json([]);
       }
     });
+  },
+
+  update: (req,res) =>{
+    db.User.findByPk(req.params.id).then(updateUser =>{
+      if(updateUser){
+
+           db.User.update(
+             {
+               username : req.body.username,
+               facebookLink: req.body.facebookLink,
+               phoneNumber: req.body.phoneNumber,
+               city: req.body.city,
+               gender : req.body.gender,
+               dob : req.body.dob,
+             },
+             {where :{id : req.params.id}}
+           ).then(newUpdate => {
+             if(newUpdate){
+                res.status(200).json({
+                 // res.write(
+                 //   JSON.stringify(newUpdate));
+                    message : "Update Successfully"
+                });
+             }
+             else{
+               res.status(422).json({
+                 message : "Failed"
+               });
+             }
+           });
+      }
+      else{
+        res.status(422).json({
+          message: "Update Failed"
+        });
+      }
+     });
+  },
+
+  change : (req, res) =>{
+    db.User.findByPk(req.params.id).then(change =>{
+      if(change){
+         bcrypt.compare(req.body.password, change.password).then(result =>{
+           if(result){
+             db.User.update({
+               password : generateHash(req.body.newpassword),
+             },
+             {where : {id : req.params.id}}
+           ).then(newpass =>{
+              if(newpass){
+                res.status(200).json({
+                  message : "Change successfuly"
+                });
+              }
+          else{
+             res.status(422).json({
+               message : "Can't update!!!"
+             });
+           }
+         });
+       }else{
+         res.status(422).json({
+           message : "Enter wrong password!!!"
+         });
+       }
+         }).catch(err =>{
+           res.status(422).json({
+             message : "Auth failed"
+           });
+         });
+      }else{
+        res.status(422).json({
+          message : "Not this person"
+        });
+      }
+    });
   }
+
 };

@@ -15,4 +15,8 @@ router.get("/:id", authMiddleware, controller.getOne);
 
 router.put("/:id", authMiddleware, controller.like);
 
+router.put("/update/:id", authMiddleware, controller.update);
+
+router.put("/changepass/:id", authMiddleware , controller.change);
+
 module.exports = router;
