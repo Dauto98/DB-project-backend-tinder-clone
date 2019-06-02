@@ -2,6 +2,11 @@ const db = require("../../models");
 const socket = require("../../server.js");
 
 const { Op } = db.Sequelize;
+const bcrypt = require("bcrypt");
+
+const generateHash = (password) => {
+  return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
+};
 
 module.exports = {
   filter: (req, res) => {
@@ -142,7 +147,7 @@ module.exports = {
                phoneNumber: req.body.phoneNumber,
                city: req.body.city,
                gender : req.body.gender,
-               dob : req.body.dob,
+               age : req.body.age,
              },
              {where :{id : req.params.id}}
            ).then(newUpdate => {
@@ -195,10 +200,11 @@ module.exports = {
          });
        }
          }).catch(err =>{
-           res.status(422).json({
+           res.status(401).json({
              message : "Auth failed"
            });
          });
+      
       }else{
         res.status(422).json({
           message : "Not this person"
