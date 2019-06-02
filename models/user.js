@@ -33,32 +33,29 @@ module.exports = (sequelize, DataTypes) => {
     age: {
       type: DataTypes.INTEGER
     }
-  },
-  {
-    classMethods: {
-      associate: models => {
-        User.hasMany(models.Feedback, {
-          onDelete: "CASCADE",
-          foreignKey: {
-            fieldName: "userId",
-            allowNull: false,
-            require: true
-          },
-          targetKey: "id"
-        });
-
-        User.hasMany(models.Notification, {
-          onDelete: "CASCADE",
-          foreignKey: {
-            fieldName: "userId",
-            allowNull: false,
-            require: true
-          },
-          targetKey: "id"
-        });
-      }
-    }
   });
+
+  User.associate = models => {
+    User.hasMany(models.Feedback, {
+      onDelete: "CASCADE",
+      foreignKey: {
+        fieldName: "userId",
+        allowNull: false,
+        require: true
+      },
+      targetKey: "id"
+    });
+
+    User.hasMany(models.Notification, {
+      onDelete: "CASCADE",
+      foreignKey: {
+        fieldName: "userId",
+        allowNull: false,
+        require: true
+      },
+      targetKey: "id"
+    });
+  };
 
   return User;
 };

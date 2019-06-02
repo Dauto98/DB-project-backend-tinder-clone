@@ -1,4 +1,5 @@
 const db = require("../../models");
+const socket = require("../../server.js");
 
 const { Op } = db.Sequelize;
 
@@ -74,6 +75,19 @@ module.exports = {
               if (!likeData || likeData.status === "unliked") {
                 res.status(200).end();
               } else {
+                // there is a match
+                db.Notification.create({
+                  header: "There is a match",
+                  content: `${targetUser.username} has liked your profile! Let's go and say hi!`,
+                  userId: req.userData.userId
+                });
+                socket.sendMatchedNoti(req.userData.userId, req.params.id, "There is a match", `${targetUser.username} has liked your profile! Let's go and say hi!`);
+                db.Notification.create({
+                  header: "There is a match",
+                  content: `${req.userData.username} has liked your profile! Let's go and say hi!`,
+                  userId: req.params.id
+                });
+                socket.sendMatchedNoti(req.params.id, req.userData.userId, "There is a match", `${req.userData.username} has liked your profile! Let's go and say hi!`);
                 res.status(200).json({ status: "matched" });
               }
             });

@@ -21,5 +21,17 @@ module.exports = (sequelize, DataTypes) => {
     },
   });
 
+  Notification.associate = models => {
+    Notification.belongsTo(models.User, {
+      onDelete: "CASCADE",
+      foreignKey: {
+        fieldName: "userId",
+        allowNull: false,
+        require: true
+      },
+      targetKey: "id"
+    });
+  };
+
   return Notification;
 };
