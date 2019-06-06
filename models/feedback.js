@@ -5,6 +5,10 @@ module.exports = (sequelize, DataTypes) => sequelize.define("Feedback", {
     allowNull: false,
     primaryKey: true
   },
+  header: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
   content: {
     type: DataTypes.STRING,
     allowNull: false,
