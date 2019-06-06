@@ -136,6 +136,29 @@ module.exports = {
     });
   },
 
+  getMatched: (req, res) => {
+    db.LikeStatus.findAll({ where: {
+      userId: req.userData.userId,
+      status: "liked"
+    },
+    attributes: ["targetUserId"],
+    raw: true }).then(data => {
+      if (data.length) {
+        db.LikeStatus.findAll({ where: {
+          userId: { [Op.in]: data.map(like => like.targetUserId) },
+          targetUserId: req.userData.userId,
+          status: "liked"
+        },
+        attributes: ["userId"],
+        raw: true }).then(userIds => {
+          db.User.findAll({ where: { id: { [Op.in]: userIds.map(id => id.userId) } } }).then(userData => {
+            res.json(userData);
+          });
+        });
+      }
+    });
+  },
+
   update: (req,res) =>{
     db.User.findByPk(req.params.id).then(updateUser =>{
       if(updateUser){
@@ -204,7 +227,7 @@ module.exports = {
              message : "Auth failed"
            });
          });
-      
+
       }else{
         res.status(422).json({
           message : "Not this person"
