@@ -23,6 +23,11 @@ db.sequelize.sync().then(() => {
   console.error("Unable to connect to the database:", err);
 });
 
-const listen = http.listen(3000, () => {
+let port = process.env.PORT;
+if (port == null || port === "") {
+  port = 3000;
+}
+
+const listen = http.listen(port, () => {
   console.log("server is running on port", listen.address().port);
 });
