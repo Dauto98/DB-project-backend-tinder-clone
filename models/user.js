@@ -55,6 +55,16 @@ module.exports = (sequelize, DataTypes) => {
       },
       targetKey: "id"
     });
+
+    User.hasMany(models.Image, {
+      onDelete: "CASCADE",
+      foreignKey: {
+        fieldName: "userId",
+        allowNull: false,
+        require: true
+      },
+      targetKey: "id"
+    });
   };
 
   return User;

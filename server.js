@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 
+const cloudinary = require("cloudinary").v2;
+
 const server = express();
 const http = require("http").Server(server);
 const io = require("socket.io")(http);
@@ -12,6 +14,12 @@ require("dotenv").config();
 server.use(cors());
 server.use(express.urlencoded({ extended: false }));
 server.use(express.json());
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 module.exports = require("./socket.js")(io);
 
