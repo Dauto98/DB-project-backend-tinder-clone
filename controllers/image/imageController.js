@@ -16,6 +16,7 @@ module.exports = {
 
   insert: (req, res) => {
     if (req.file) {
+      console.log(req.file);
       const imageId = uuid();
       db.Image.create({
         id: imageId,
@@ -31,9 +32,8 @@ module.exports = {
         });
       }).catch(err => {
         console.error(err);
-        res.status(500).json({ message: "Error while inserting to DB" })
+        res.status(500).json({ message: "Error while inserting to DB" });
       });
-      res.end();
     } else {
       res.status(400).json({ message: "No image uploaded" });
     }
