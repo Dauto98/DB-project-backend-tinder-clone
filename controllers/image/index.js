@@ -1,7 +1,9 @@
 const express = require("express");
 const multer = require("multer")({
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.includes("image/")) {
+    console.log("Upload file filter");
+    console.log(file);
+    if (file.mimetype && file.mimetype.includes("image/")) {
       cb(null, true);
     } else {
       cb(null, false);

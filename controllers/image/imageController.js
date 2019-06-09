@@ -29,6 +29,9 @@ module.exports = {
             res.status(200).end();
           }
         });
+      }).catch(err => {
+        console.error(err);
+        res.status(500).json({ message: "Error while inserting to DB" })
       });
       res.end();
     } else {
