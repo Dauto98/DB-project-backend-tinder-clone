@@ -13,7 +13,7 @@ require("dotenv").config();
 
 server.use(cors());
 server.use(express.urlencoded({ extended: false }));
-server.use(express.json());
+server.use(express.json({ limit: "5mb" }));
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
