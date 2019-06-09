@@ -15,14 +15,13 @@ module.exports = {
   },
 
   insert: (req, res) => {
-    if (req.file) {
-      console.log(req.file);
+    if (req.body.image) {
       const imageId = uuid();
       db.Image.create({
         id: imageId,
         userId: req.userData.userId
       }).then(() => {
-        cloudinary.uploader.upload(`data:${req.file.mimetype};base64,${Buffer.from(req.file.buffer).toString("base64")}`, { public_id: imageId }, (err, result) => {
+        cloudinary.uploader.upload(req.body.image, { public_id: imageId }, (err, result) => {
           if (err) {
             console.log(err);
             res.status(500).json({ message: "Something is wrong with image storage" });
