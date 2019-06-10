@@ -1,8 +1,10 @@
+const bcrypt = require("bcrypt");
+const cloudinary = require("cloudinary").v2;
+
 const db = require("../../models");
 const socket = require("../../server.js");
 
 const { Op } = db.Sequelize;
-const bcrypt = require("bcrypt");
 
 const generateHash = (password) => {
   return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
@@ -14,7 +16,7 @@ module.exports = {
       if (user) {
         db.LikeStatus.findAll({ where: { userId: req.userData.userId } }).then(likeData => {
           if (likeData.length) {
-            db.User.findAll({
+            return db.User.findAll({
               where: {
                 id: { [Op.notIn]: likeData.map(like => like.targetUserId) },
                 gender: user.gender === "F" ? "M" : "F",
@@ -22,17 +24,29 @@ module.exports = {
               },
               order: [["createdAt", "ASC"]],
               limit: req.query.limit || 20
-            }).then(data => res.json(data.map(userData => ({ ...userData.get({ plain: true }), dob: new Date(userData.dob / 1000).getTime().toString() }))));
-          } else {
-            db.User.findAll({
-              where: {
-                gender: user.gender === "F" ? "M" : "F",
-                city: user.city
-              },
-              order: [["createdAt", "ASC"]],
-              limit: req.query.limit || 20
-            }).then(data => res.json(data.map(userData => ({ ...userData.get({ plain: true }), dob: new Date(userData.dob / 1000).getTime().toString() }))));
+            });
           }
+          return db.User.findAll({
+            where: {
+              gender: user.gender === "F" ? "M" : "F",
+              city: user.city
+            },
+            order: [["createdAt", "ASC"]],
+            limit: req.query.limit || 20
+          });
+        }).then(data => {
+          db.Image.findAll({ where: {
+            userId: { [Op.in]: data.map(user => user.id) }
+          } }).then(userImages => {
+            res.json(data.map(userData => ({
+              ...userData.get({ plain: true }),
+              images: userImages.filter(image => image.userId === userData.id).map(image => ({
+                id: image.id,
+                url: cloudinary.url(image.id),
+                order: image.order
+              }))
+            })));
+          });
         });
       } else {
         res.status(400).end();
@@ -43,9 +57,15 @@ module.exports = {
   getOne: (req, res) => {
     db.User.findByPk(req.params.id).then(user => {
       if (user) {
-        res.json({
-          ...user.get({ plain: true }),
-          dob: new Date(user.dob / 1000).getTime().toString()
+        db.Image.findAll({ where: { userId: user.id } }).then(images => {
+          res.json({
+            ...user.get({ plain: true }),
+            images: images.map(image => ({
+              id: image.id,
+              url: cloudinary.url(image.id),
+              order: image.order
+            }))
+          });
         });
       } else {
         res.json({ error: "user not found" });
@@ -159,78 +179,72 @@ module.exports = {
     });
   },
 
-  update: (req,res) =>{
-    db.User.findByPk(req.params.id).then(updateUser =>{
-      if(updateUser){
-
-           db.User.update(
-             {
-               username : req.body.username,
-               facebookLink: req.body.facebookLink,
-               phoneNumber: req.body.phoneNumber,
-               city: req.body.city,
-               gender : req.body.gender,
-               age : req.body.age,
-             },
-             {where :{id : req.params.id}}
-           ).then(newUpdate => {
-             if(newUpdate){
-                res.status(200).json({
-                 // res.write(
-                 //   JSON.stringify(newUpdate));
-                    message : "Update Successfully"
-                });
-             }
-             else{
-               res.status(422).json({
-                 message : "Failed"
-               });
-             }
-           });
-      }
-      else{
+  update: (req, res) => {
+    db.User.findByPk(req.params.id).then(updateUser => {
+      if (updateUser) {
+        db.User.update(
+          {
+            username: req.body.username,
+            facebookLink: req.body.facebookLink,
+            phoneNumber: req.body.phoneNumber,
+            city: req.body.city,
+            gender: req.body.gender,
+            age: req.body.age,
+          },
+          { where: { id: req.params.id } }
+        ).then(newUpdate => {
+          if (newUpdate) {
+            res.status(200).json({
+              // res.write(
+              //   JSON.stringify(newUpdate));
+              message: "Update Successfully"
+            });
+          } else {
+            res.status(422).json({
+              message: "Failed"
+            });
+          }
+        });
+      } else {
         res.status(422).json({
           message: "Update Failed"
         });
       }
-     });
+    });
   },
 
-  change : (req, res) =>{
-    db.User.findByPk(req.params.id).then(change =>{
-      if(change){
-         bcrypt.compare(req.body.password, change.password).then(result =>{
-           if(result){
-             db.User.update({
-               password : generateHash(req.body.newpassword),
-             },
-             {where : {id : req.params.id}}
-           ).then(newpass =>{
-              if(newpass){
+  change: (req, res) => {
+    db.User.findByPk(req.params.id).then(change => {
+      if (change) {
+        bcrypt.compare(req.body.password, change.password).then(result => {
+          if (result) {
+            db.User.update({
+              password: generateHash(req.body.newpassword),
+            },
+            { where: { id: req.params.id } }).then(newpass => {
+              if (newpass) {
                 res.status(200).json({
-                  message : "Change successfuly"
+                  message: "Change successfuly"
+                });
+              } else {
+                res.status(422).json({
+                  message: "Can't update!!!"
                 });
               }
-          else{
-             res.status(422).json({
-               message : "Can't update!!!"
-             });
-           }
-         });
-       }else{
-         res.status(422).json({
-           message : "Enter wrong password!!!"
-         });
-       }
-         }).catch(err =>{
-           res.status(401).json({
-             message : "Auth failed"
-           });
-         });
-
-      }else{
+            });
+          } else {
+            res.status(422).json({
+              message: "Enter wrong password!!!"
+            });
+          }
+        }).catch(err => {
+          res.status(401).json({
+            message: "Auth failed"
+          });
+        });
+      } else {
         res.status(422).json({
-          message : "Not this person"
+          message: "Not this person"
         });
       }
     });
