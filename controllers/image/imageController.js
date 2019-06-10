@@ -4,17 +4,13 @@ const db = require("../../models");
 
 module.exports = {
   getImageOfUser: (req, res) => {
-    db.Image.destroy({
-      where: { order: null }
-    }).then(() => {
-      db.Image.findAll({ where: { userId: req.params.id } }).then(imageData => {
-        if (imageData.length) {
-          const imageUrls = imageData.map((image) => ({ id: image.id, url: cloudinary.url(image.id), order: image.order })).sort((a, b) => a.order - b.order);
-          res.json(imageUrls);
-        } else {
-          res.json([]);
-        }
-      });
+    db.Image.findAll({ where: { userId: req.params.id } }).then(imageData => {
+      if (imageData.length) {
+        const imageUrls = imageData.map((image) => ({ id: image.id, url: cloudinary.url(image.id), order: image.order })).sort((a, b) => a.order - b.order);
+        res.json(imageUrls);
+      } else {
+        res.json([]);
+      }
     });
   },
 
