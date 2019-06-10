@@ -6,7 +6,7 @@ module.exports = {
   getImageOfUser: (req, res) => {
     db.Image.findAll({ where: { userId: req.params.id } }).then(imageData => {
       if (imageData.length) {
-        const imageUrls = imageData.map(image => ({ id: image.id, url: cloudinary.url(image.id) }));
+        const imageUrls = imageData.map((image, index) => ({ id: image.id, url: cloudinary.url(image.id), order: image.order || index })).sort((a, b) => a.order - b.order);
         res.json(imageUrls);
       } else {
         res.json([]);
@@ -19,7 +19,8 @@ module.exports = {
       const imageId = uuid();
       db.Image.create({
         id: imageId,
-        userId: req.userData.userId
+        userId: req.userData.userId,
+        order: req.body.imgOrder
       }).then(() => {
         cloudinary.uploader.upload(req.body.image, { public_id: imageId }, (err, result) => {
           if (err) {

@@ -4,5 +4,8 @@ module.exports = (sequelize, DataTypes) => sequelize.define("Image", {
     defaultValue: DataTypes.UUIDV4,
     allowNull: false,
     primaryKey: true
+  },
+  order: {
+    type: DataTypes.INTEGER
   }
 });
