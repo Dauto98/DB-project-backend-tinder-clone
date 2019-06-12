@@ -131,8 +131,18 @@ module.exports = {
     },
     attributes: ["targetUserId"] }).then(data => {
       if (data.length) {
-        db.User.findAll({ where: { id: { [Op.in]: data.map(like => like.targetUserId) } } }).then(userData => {
-          res.json(userData);
+        Promise.all([
+          db.User.findAll({ where: { id: { [Op.in]: data.map(like => like.targetUserId) } } }),
+          db.Image.findAll({ where: { userId: { [Op.in]: data.map(like => like.targetUserId) } } })
+        ]).then(([userData, imageData]) => {
+          res.json(userData.map(user => ({
+            ...user.get({ plain: true }),
+            image: imageData.filter(image => image.userId === userData.id).map(image => ({
+              id: image.id,
+              url: cloudinary.url(image.id),
+              order: image.order
+            }))
+          })));
         });
       } else {
         res.json([]);
@@ -147,8 +157,18 @@ module.exports = {
     },
     attributes: ["targetUserId"] }).then(data => {
       if (data.length) {
-        db.User.findAll({ where: { id: { [Op.in]: data.map(like => like.targetUserId) } } }).then(userData => {
-          res.json(userData);
+        Promise.all([
+          db.User.findAll({ where: { id: { [Op.in]: data.map(like => like.targetUserId) } } }),
+          db.Image.findAll({ where: { userId: { [Op.in]: data.map(like => like.targetUserId) } } })
+        ]).then(([userData, imageData]) => {
+          res.json(userData.map(user => ({
+            ...user.get({ plain: true }),
+            image: imageData.filter(image => image.userId === userData.id).map(image => ({
+              id: image.id,
+              url: cloudinary.url(image.id),
+              order: image.order
+            }))
+          })));
         });
       } else {
         res.json([]);
@@ -171,8 +191,18 @@ module.exports = {
         },
         attributes: ["userId"],
         raw: true }).then(userIds => {
-          db.User.findAll({ where: { id: { [Op.in]: userIds.map(id => id.userId) } } }).then(userData => {
-            res.json(userData);
+          Promise.all([
+            db.User.findAll({ where: { id: { [Op.in]: userIds.map(id => id.userId) } } }),
+            db.Image.findAll({ where: { userId: { [Op.in]: userIds.map(id => id.userId) } } })
+          ]).then(([userData, imageData]) => {
+            res.json(userData.map(user => ({
+              ...user.get({ plain: true }),
+              image: imageData.filter(image => image.userId === userData.id).map(image => ({
+                id: image.id,
+                url: cloudinary.url(image.id),
+                order: image.order
+              }))
+            })));
           });
         });
       }
