@@ -1,5 +1,7 @@
 const express = require("express");
 const cors = require("cors");
+const winston = require("winston");
+const expressWinston = require("express-winston");
 
 const cloudinary = require("cloudinary").v2;
 
@@ -15,6 +17,18 @@ server.use(cors());
 server.use(express.urlencoded({ extended: false }));
 server.use(express.json({ limit: "5mb" }));
 
+server.use(expressWinston.logger({
+  transports: [
+    new winston.transports.Console()
+  ],
+  format: winston.format.combine(
+    winston.format.colorize(),
+    winston.format.json(),
+    winston.format.timestamp(),
+    winston.format.prettyPrint()
+  )
+}));
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -24,6 +38,18 @@ cloudinary.config({
 module.exports = require("./socket.js")(io);
 
 require("./routes.js")(server);
+
+server.use(expressWinston.errorLogger({
+  transports: [
+    new winston.transports.Console()
+  ],
+  format: winston.format.combine(
+    winston.format.colorize(),
+    winston.format.json(),
+    winston.format.timestamp(),
+    winston.format.prettyPrint()
+  )
+}));
 
 db.sequelize.sync().then(() => {
   console.log("Connection has been established successfully.");

@@ -6,7 +6,7 @@ module.exports = {
   get: (req, res) => {
     db.Notification.findAll({
       where: { userId: req.userData.userId },
-      order: [["createdAt", "ASC"]],
+      order: [["createdAt", "DESC"]],
       limit: req.query.limit || 20,
       offset: req.query.offset || 0
     }).then(data => {

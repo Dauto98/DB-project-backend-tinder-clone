@@ -1,3 +1,4 @@
+const winston = require("winston");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator/check");
@@ -8,11 +9,22 @@ const generateHash = (password) => {
   return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
 };
 
+const logger = winston.createLogger({
+  transports: [
+    new winston.transports.Console()
+  ],
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json(),
+    winston.format.colorize()
+  )
+});
+
 module.exports = {
   login: (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      console.error(`Validation error: ${JSON.stringify(errors.array())}`);
+      logger.error(`Validation error: ${JSON.stringify(errors.array())}`);
       res.status(422).json({ errors: errors.array() });
     } else {
       db.User.findOne({
@@ -22,13 +34,14 @@ module.exports = {
           res.status(422).json({
             message: "Auth failed"
           });
-          console.log("User does not exist!");
+          logger.error("User does not exist!");
         } else {
           bcrypt.compare(req.body.password, user.password).then(result => {
             if (!result) {
               res.status(422).json({
                 message: "Auth failed!"
               });
+              logger.info("Wrong password");
             } else {
               jwt.sign({
                 username: user.username,
@@ -38,6 +51,7 @@ module.exports = {
                   res.status(422).json({
                     message: "Auth failed",
                   });
+                  logger.error("Cannot create token");
                 } else {
                   res.status(200).json({
                     message: "Logged in successfully",
@@ -48,7 +62,7 @@ module.exports = {
               });
             }
           }).catch(err => {
-            console.error(err);
+            logger.error(err);
             res.status(422).json({
               message: "Auth failed!"
             });
@@ -61,7 +75,7 @@ module.exports = {
   register: (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      console.error(`Validation error: ${JSON.stringify(errors.array())}`);
+      logger.error(`Validation error: ${JSON.stringify(errors.array())}`);
       res.status(422).json({ errors: errors.array() });
     } else {
       const newUser = db.User.build({
@@ -79,7 +93,7 @@ module.exports = {
             message: "Registered successfully"
           });
         } else {
-          console.log("User already exists!");
+          logger.info("User already exists!");
           res.status(422).json({
             message: "User already exists"
           });

@@ -137,7 +137,7 @@ module.exports = {
         ]).then(([userData, imageData]) => {
           res.json(userData.map(user => ({
             ...user.get({ plain: true }),
-            images: imageData.filter(image => image.userId === userData.id).map(image => ({
+            images: imageData.filter(image => image.userId === user.id).map(image => ({
               id: image.id,
               url: cloudinary.url(image.id),
               order: image.order
@@ -163,7 +163,7 @@ module.exports = {
         ]).then(([userData, imageData]) => {
           res.json(userData.map(user => ({
             ...user.get({ plain: true }),
-            images: imageData.filter(image => image.userId === userData.id).map(image => ({
+            images: imageData.filter(image => image.userId === user.id).map(image => ({
               id: image.id,
               url: cloudinary.url(image.id),
               order: image.order
@@ -197,7 +197,7 @@ module.exports = {
           ]).then(([userData, imageData]) => {
             res.json(userData.map(user => ({
               ...user.get({ plain: true }),
-              images: imageData.filter(image => image.userId === userData.id).map(image => ({
+              images: imageData.filter(image => image.userId === user.id).map(image => ({
                 id: image.id,
                 url: cloudinary.url(image.id),
                 order: image.order
