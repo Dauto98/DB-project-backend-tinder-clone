@@ -22,9 +22,9 @@ server.use(expressWinston.logger({
     new winston.transports.Console()
   ],
   format: winston.format.combine(
-    winston.format.colorize(),
     winston.format.json(),
-    winston.format.timestamp()
+    winston.format.timestamp(),
+    winston.format.colorize()
   )
 }));
 
@@ -43,9 +43,9 @@ server.use(expressWinston.errorLogger({
     new winston.transports.Console()
   ],
   format: winston.format.combine(
-    winston.format.colorize(),
     winston.format.json(),
-    winston.format.timestamp()
+    winston.format.timestamp(),
+    winston.format.colorize()
   )
 }));
 
