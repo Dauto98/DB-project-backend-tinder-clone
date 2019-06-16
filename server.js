@@ -24,8 +24,7 @@ server.use(expressWinston.logger({
   format: winston.format.combine(
     winston.format.colorize(),
     winston.format.json(),
-    winston.format.timestamp(),
-    winston.format.prettyPrint()
+    winston.format.timestamp()
   )
 }));
 
@@ -46,8 +45,7 @@ server.use(expressWinston.errorLogger({
   format: winston.format.combine(
     winston.format.colorize(),
     winston.format.json(),
-    winston.format.timestamp(),
-    winston.format.prettyPrint()
+    winston.format.timestamp()
   )
 }));
 
